@@ -21,7 +21,8 @@ class MainApp extends StatefulWidget {
 
 /// SimpleFrameAppState mixin helps to manage the lifecycle of the Frame connection outside of this file
 class MainAppState extends State<MainApp> with SimpleFrameAppState {
-  StreamSubscription<int>? tapSubs;
+  StreamSubscription<int>? _tapSubs;
+  String? _message;
 
   MainAppState() {
     Logger.root.level = Level.FINER;
@@ -37,11 +38,12 @@ class MainAppState extends State<MainApp> with SimpleFrameAppState {
     if (mounted) setState(() {});
 
     try {
-      tapSubs?.cancel();
-      tapSubs = tapDataResponse(frame!.dataResponse, const Duration(milliseconds: 300))
+      _tapSubs?.cancel();
+      _tapSubs = tapDataResponse(frame!.dataResponse, const Duration(milliseconds: 300))
         .listen((taps) {
-          frame!.sendMessage(TxPlainText(msgCode: 0x12, text: '$taps-tap detected'));
-          _log.fine('$taps-tap detected');
+          _message = '$taps-tap detected';
+          frame!.sendMessage(TxPlainText(msgCode: 0x12, text: _message!));
+          setState(() {});
         });
 
       // let Frame know to subscribe for taps and send them to us
@@ -80,13 +82,13 @@ class MainAppState extends State<MainApp> with SimpleFrameAppState {
         appBar: AppBar(
             title: const Text('Frame Tap Detector'),
             actions: [getBatteryWidget()]),
-        body: const Padding(
-          padding: EdgeInsets.all(8.0),
+        body: Padding(
+          padding: const EdgeInsets.all(8.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Spacer(),
+              Center(child: Text(_message ?? '(Connect, Start, Run, then) Tap Frame to start!')),
             ],
           ),
         ),
