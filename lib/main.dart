@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:frame_tap_detector/tap_data_response.dart';
 import 'package:logging/logging.dart';
+import 'package:simple_frame_app/rx/tap.dart';
 
 import 'package:simple_frame_app/simple_frame_app.dart';
 import 'package:simple_frame_app/tx/code.dart';
@@ -39,7 +39,7 @@ class MainAppState extends State<MainApp> with SimpleFrameAppState {
 
     try {
       _tapSubs?.cancel();
-      _tapSubs = tapDataResponse(frame!.dataResponse, const Duration(milliseconds: 300))
+      _tapSubs = RxTap().attach(frame!.dataResponse)
         .listen((taps) {
           _message = '$taps-tap detected';
           frame!.sendMessage(TxPlainText(msgCode: 0x12, text: _message!));
